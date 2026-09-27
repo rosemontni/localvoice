@@ -51,9 +51,36 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\venv\Scripts\pythonw.exe"; 
 Name: "{autoprograms}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
 
 [Run]
-Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\installer\setup_env.ps1"" -InstallDir ""{app}"""; StatusMsg: "Setting up the Python environment (several minutes, ~2 GB download the first time)..."; Flags: waituntilterminated
-Filename: "{app}\venv\Scripts\pythonw.exe"; Parameters: """{app}\scripts\run_tray.py"""; Description: "Launch {#MyAppName} now"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\venv\Scripts\pythonw.exe"; Parameters: """{app}\scripts\run_tray.py"""; Description: "Launch {#MyAppName} now"; Flags: postinstall nowait skipifsilent; Check: FileExists(ExpandConstant('{app}\venv\Scripts\pythonw.exe'))
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\venv"
-Type: filesandordirs; Name: "{app}\python3.12"
+
+[Code]
+procedure RunSetupScript();
+var
+  ResultCode: Integer;
+  ps1, installDir, logPath, NL: String;
+begin
+  installDir := ExpandConstant('{app}');
+  ps1 := installDir + '\installer\setup_env.ps1';
+  logPath := installDir + '\installer\setup_env.log';
+  if not Exec('powershell.exe',
+      '-NoProfile -ExecutionPolicy Bypass -File "' + ps1 + '" -InstallDir "' + installDir + '"',
+      '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+    ResultCode := -1;
+  if ResultCode <> 0 then begin
+    NL := #13#10;
+    MsgBox('Local Voice environment setup did not finish successfully (exit code ' + IntToStr(ResultCode) + ').' + NL + NL +
+           'Log file: ' + logPath + NL + NL +
+           'The app is installed but won''t run until this is resolved. You can re-run setup any time with:' + NL +
+           'powershell -File "' + ps1 + '" -InstallDir "' + installDir + '"',
+           mbError, MB_OK);
+  end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+    RunSetupScript();
+end;
