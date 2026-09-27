@@ -14,7 +14,22 @@ try {
 
     $venvDir = Join-Path $InstallDir "venv"
     $venvScripts = Join-Path $venvDir "Scripts"
+    $venvPython = Join-Path $venvScripts "python.exe"
+    $venvPythonw = Join-Path $venvScripts "pythonw.exe"
     $pythonExe = $null
+
+    # Stop any running instance first: re-running this script (e.g. re-running
+    # the installer, or a future update) must not fail just because the app
+    # launched from a prior successful run is holding its own pythonw.exe
+    # open. Scoped to processes running specifically from this install dir.
+    Get-Process -Name "pythonw", "python" -ErrorAction SilentlyContinue |
+        Where-Object { $_.Path -and $_.Path.StartsWith($InstallDir, [StringComparison]::OrdinalIgnoreCase) } |
+        Stop-Process -Force -ErrorAction SilentlyContinue
+
+    if ((Test-Path $venvPython) -and (Test-Path $venvPythonw)) {
+        Write-Host "Existing environment found at $venvDir; verifying dependencies rather than re-downloading Python."
+    }
+    else {
 
     # Prefer an existing suitable Python (3.10-3.12; ctranslate2 has no 3.13 wheels yet).
     # Windows ships a "python" App Execution Alias stub at .../WindowsApps/python.exe even
@@ -85,10 +100,10 @@ try {
         Remove-Item $getPipPath -ErrorAction SilentlyContinue
     }
 
-    $venvPython = Join-Path $venvScripts "python.exe"
-    $venvPythonw = Join-Path $venvScripts "pythonw.exe"
     if (-not (Test-Path $venvPython)) { throw "python.exe is missing at $venvPython" }
     if (-not (Test-Path $venvPythonw)) { throw "pythonw.exe is missing at $venvPythonw (base Python may be missing the pythonw component)" }
+
+    } # end: no existing environment found, acquire one
 
     Write-Host "Installing dependencies (first run downloads roughly 2 GB: CUDA runtime libraries + packages; the Whisper model itself downloads separately on first dictation)..."
     & $venvPython -m pip install --upgrade pip
