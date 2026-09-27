@@ -33,6 +33,7 @@ class Settings:
     vocabulary: list[str] = field(default_factory=list)  # recognition hints (faster-whisper `hotwords`); no exact-match guarantee, per REQUIREMENTS.md F09
     auto_paste: bool = False  # M2: one Ctrl+V via SendInput if the foreground target hasn't changed; clipboard fallback always remains
     persistent_context: bool = True  # bounded, abstracted standing facts (memory.py) that survive restarts; see docs/DECISIONS_AND_RISKS.md
+    check_for_updates: bool = True  # narrow exception to the offline-by-default policy; at most once/day automatically, see updater.py
 
 
 def _validate(data: dict) -> dict:

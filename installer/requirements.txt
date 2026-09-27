@@ -1,0 +1,10 @@
+ctranslate2==4.8.2
+faster-whisper==1.2.1
+numpy==2.5.3
+nvidia-cublas-cu12==12.9.2.10
+nvidia-cudnn-cu12==9.26.0.51
+pillow==12.3.0
+pynput==1.8.2
+pystray==0.19.5
+pywin32==312
+sounddevice==0.5.6
