@@ -117,6 +117,13 @@ def worker_main(job_queue: "mp.Queue[Any]", result_queue: "mp.Queue[Any]", model
                 vad_filter=False,  # VAD arrives at M4; M1 relies on the caller's own silence check
                 hotwords=job.hotwords,
                 initial_prompt=_ZH_SCRIPT_INITIAL_PROMPT,
+                # Default True: conditions each segment's decoding on the text already
+                # produced for this clip. A well-documented cause of Whisper dropping or
+                # hallucinating content on longer audio -- an early misstep (background
+                # noise, the hotkey's own keypress sound, hesitation) can cascade into
+                # skipped/corrupted later segments. Found 2026-09-27 after a user report
+                # of a long dictation where only the ending was transcribed.
+                condition_on_previous_text=False,
             )
             text = "".join(segment.text for segment in segments).strip()
             duration_s = time.monotonic() - t0
