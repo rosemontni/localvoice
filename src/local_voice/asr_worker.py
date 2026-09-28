@@ -84,6 +84,14 @@ def worker_main(job_queue: "mp.Queue[Any]", result_queue: "mp.Queue[Any]", model
 
     try:
         _add_nvidia_dll_dirs()
+        # huggingface_hub's newer Xet-based chunked download path was found
+        # (2026-09-27, live testing) to silently produce a dangling blob
+        # reference with none of the actual model weights downloaded --
+        # model loading reports success in ~3s (vs. a real ~3GB download
+        # taking over a minute) and produces garbled/hallucinated
+        # transcriptions, with no error anywhere. Forcing the classic HTTP
+        # download path avoids this entirely. See docs/DECISIONS_AND_RISKS.md.
+        os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
         from faster_whisper import WhisperModel
 
         model = WhisperModel(model_size, device=device, compute_type=compute_type)
