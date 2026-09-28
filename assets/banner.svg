@@ -1,0 +1,71 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#131A2E"/>
+      <stop offset="55%" stop-color="#1E2E56"/>
+      <stop offset="100%" stop-color="#2E5AAC"/>
+    </linearGradient>
+    <linearGradient id="micFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#DCE6F7"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#5B8DEF" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#5B8DEF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="300" fill="url(#bg)"/>
+
+  <!-- soft glow behind the mic -->
+  <circle cx="150" cy="150" r="170" fill="url(#glow)"/>
+
+  <!-- subtle waveform motif, right side -->
+  <g opacity="0.16" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round">
+    <line x1="760" y1="150" x2="760" y2="150"/>
+    <line x1="790" y1="120" x2="790" y2="180"/>
+    <line x1="820" y1="90"  x2="820" y2="210"/>
+    <line x1="850" y1="60"  x2="850" y2="240"/>
+    <line x1="880" y1="100" x2="880" y2="200"/>
+    <line x1="910" y1="130" x2="910" y2="170"/>
+    <line x1="940" y1="75"  x2="940" y2="225"/>
+    <line x1="970" y1="50"  x2="970" y2="250"/>
+    <line x1="1000" y1="95" x2="1000" y2="205"/>
+    <line x1="1030" y1="125" x2="1030" y2="175"/>
+    <line x1="1060" y1="105" x2="1060" y2="195"/>
+    <line x1="1090" y1="140" x2="1090" y2="160"/>
+  </g>
+
+  <!-- microphone glyph -->
+  <g transform="translate(150,150)">
+    <circle r="88" fill="#FFFFFF" opacity="0.08"/>
+    <circle r="88" fill="none" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="2"/>
+    <rect x="-26" y="-58" width="52" height="80" rx="26" fill="url(#micFill)"/>
+    <path d="M -46 -6 A 46 46 0 0 0 46 -6" fill="none" stroke="url(#micFill)" stroke-width="9" stroke-linecap="round"/>
+    <line x1="0" y1="40" x2="0" y2="62" stroke="url(#micFill)" stroke-width="9" stroke-linecap="round"/>
+    <line x1="-24" y1="62" x2="24" y2="62" stroke="url(#micFill)" stroke-width="9" stroke-linecap="round"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="290" y="150" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="66" font-weight="700" fill="#FFFFFF">Local Voice</text>
+  <text x="292" y="190" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="23" font-weight="400" fill="#B9C8EA">Local, offline dictation for English, Mandarin &amp; mixed speech</text>
+
+  <!-- badge row -->
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">
+    <g transform="translate(292,220)">
+      <rect width="108" height="34" rx="17" fill="#FFFFFF" opacity="0.10"/>
+      <rect width="108" height="34" rx="17" fill="none" stroke="#8FB2EE" stroke-opacity="0.5"/>
+      <text x="54" y="22" text-anchor="middle" fill="#DCE6F7">100% Local</text>
+    </g>
+    <g transform="translate(412,220)">
+      <rect width="96" height="34" rx="17" fill="#FFFFFF" opacity="0.10"/>
+      <rect width="96" height="34" rx="17" fill="none" stroke="#8FB2EE" stroke-opacity="0.5"/>
+      <text x="48" y="22" text-anchor="middle" fill="#DCE6F7">No Cloud</text>
+    </g>
+    <g transform="translate(520,220)">
+      <rect width="150" height="34" rx="17" fill="#FFFFFF" opacity="0.10"/>
+      <rect width="150" height="34" rx="17" fill="none" stroke="#8FB2EE" stroke-opacity="0.5"/>
+      <text x="75" y="22" text-anchor="middle" fill="#DCE6F7">GPU-Accelerated</text>
+    </g>
+  </g>
+</svg>

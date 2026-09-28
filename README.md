@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="Local Voice — local, offline dictation for English, Mandarin &amp; mixed speech" width="100%">
+</p>
+
 # Local Voice
 
 A local Windows dictation application for Mandarin, English, and mixed Chinese-English speech: hold a hotkey, speak, release, and get the transcript on your clipboard (and optionally auto-pasted) — fully local GPU transcription, no cloud.
