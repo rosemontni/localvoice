@@ -54,10 +54,15 @@ def correct_grammar_cloud(text: str, context: str = "", model: str = DEFAULT_MOD
 
     try:
         client = _get_client()
+        # This SDK generation (anthropic>=1.x) dropped raw `temperature`
+        # sampling control from the public API entirely. `output_config`'s
+        # `effort` looked like the closest replacement lever, but
+        # claude-haiku-4-5-20251001 rejects it outright ("This model does
+        # not support the effort parameter") -- confirmed live, not assumed.
+        # No generation-control knob is passed; the model's default applies.
         response = client.messages.create(
             model=model,
             max_tokens=MAX_TOKENS,
-            temperature=0,
             messages=[{"role": "user", "content": prompt}],
         )
         corrected = "".join(block.text for block in response.content if block.type == "text").strip()

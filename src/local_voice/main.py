@@ -17,10 +17,15 @@ from .config import load_settings
 from .controller import Controller, State
 from .hotkey import HotkeyListener
 from .logging_setup import setup_logging
+from .single_instance import acquire as acquire_single_instance_lock
 
 
 def main() -> None:
     logger = setup_logging()
+    if not acquire_single_instance_lock():
+        logger.warning("another instance is already running; exiting without starting a second one")
+        print("Local Voice is already running (check your system tray or existing console window).")
+        return
     settings = load_settings()
     logger.info("settings loaded: hotkey=%s language=%s mode=%s microphone=%s", settings.hotkey, settings.language, settings.mode, settings.microphone)
 

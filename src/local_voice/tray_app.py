@@ -19,6 +19,7 @@ from .config import RUNTIME_ROOT, load_settings
 from .controller import Controller, State
 from .hotkey import HotkeyListener
 from .logging_setup import LOG_PATH, setup_logging
+from .single_instance import acquire as acquire_single_instance_lock
 from .updater import check_now, maybe_check_once_per_day
 
 logger = logging.getLogger("local_voice.tray")
@@ -51,6 +52,9 @@ def _open_folder(path) -> None:
 
 def main() -> None:
     logger_root = setup_logging()
+    if not acquire_single_instance_lock():
+        logger_root.warning("another instance is already running; exiting without starting a second one")
+        return
     settings = load_settings()
     logger_root.info("local-voice %s starting (tray)", __version__)
 
