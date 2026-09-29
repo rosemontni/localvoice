@@ -50,10 +50,26 @@ def _open_folder(path) -> None:
         logger.exception("could not open folder: %s", path)
 
 
+def _notify_already_running() -> None:
+    # This process never creates a pystray Icon (nothing to run() and pump a
+    # message loop for), so it can't use icon.notify() -- a plain native
+    # message box is the simplest way to actually tell the user what
+    # happened, instead of silently exiting with only a log line.
+    import ctypes
+
+    ctypes.windll.user32.MessageBoxW(
+        0,
+        "Local Voice is already running.\n\nCheck your system tray (including the hidden-icons overflow area, the ^ arrow next to the clock) for its icon.",
+        "Local Voice",
+        0x40,  # MB_ICONINFORMATION
+    )
+
+
 def main() -> None:
     logger_root = setup_logging()
     if not acquire_single_instance_lock():
         logger_root.warning("another instance is already running; exiting without starting a second one")
+        _notify_already_running()
         return
     settings = load_settings()
     logger_root.info("local-voice %s starting (tray)", __version__)
@@ -103,12 +119,18 @@ def main() -> None:
 
     def _watch_state() -> None:
         last_state: State | None = None
+        shown_ready_notification = False
         while not controller.quit_requested:
             if controller.state != last_state:
                 last_state = controller.state
                 try:
                     icon.icon = _state_image(controller.state)
                     icon.title = f"Local Voice — {controller.state.name}"
+                    if controller.state is State.READY and not shown_ready_notification:
+                        shown_ready_notification = True
+                        icon.notify(f"Ready — hold {settings.hotkey.upper()} to dictate.", title="Local Voice")
+                    elif controller.state is State.UNAVAILABLE:
+                        icon.notify(f"Failed to start: {controller.unavailable_reason}", title="Local Voice")
                 except Exception:
                     logger.exception("failed to update tray icon; continuing")
             time.sleep(0.2)
@@ -121,11 +143,20 @@ def main() -> None:
         if result:
             icon.notify(f"Local Voice {result['version']} is available: {result['url']}", title="Update available")
 
-    threading.Thread(target=_watch_state, daemon=True).start()
-    threading.Thread(target=_startup_update_check, daemon=True).start()
+    def _on_icon_ready(icon: pystray.Icon) -> None:
+        # Runs once the icon actually exists in the shell (pystray's
+        # documented hook for this) -- calling icon.notify() any earlier
+        # risks racing the icon's own registration. This is the "yes,
+        # something happened" signal for the first few seconds while the
+        # model is still loading, before the tray icon's own color change
+        # is something anyone would think to go looking for.
+        icon.visible = True
+        icon.notify("Starting up — loading the speech model, this takes a few seconds...", title="Local Voice")
+        threading.Thread(target=_watch_state, daemon=True).start()
+        threading.Thread(target=_startup_update_check, daemon=True).start()
 
     try:
-        icon.run()  # blocks this thread until icon.stop() (Quit, or state-watch loop noticing quit_requested)
+        icon.run(setup=_on_icon_ready)  # blocks this thread until icon.stop() (Quit, or state-watch loop noticing quit_requested)
     finally:
         listener.stop()
         controller.shutdown()
