@@ -13,6 +13,11 @@ names/topics from earlier in the session to disambiguate the current one --
 the same idea Typeless uses server-side with much larger context, applied
 locally at a much smaller scale.
 
+The grammar-cleanup backend (settings.cleanup_backend) is "local" (Ollama,
+on-device) by default; "cloud" (cloud_cleanup.py, Anthropic API) sends the
+dictated text -- never audio -- to a frontier model instead, opt-in only.
+See docs/DECISIONS_AND_RISKS.md, 2026-09-28.
+
 Cross-session memory (memory.py) extends this across restarts: a bounded,
 abstracted list of standing facts (names/recurring terms, not raw
 transcripts) persisted to disk, on by default (settings.persistent_context).
@@ -43,7 +48,7 @@ from collections import deque
 from enum import Enum, auto
 from typing import Callable
 
-from . import asr_worker, clipboard, cleanup, memory, paste
+from . import asr_worker, clipboard, cleanup, cloud_cleanup, memory, paste
 from .audio_capture import CaptureSession, MicrophoneUnavailableError, is_signal_present
 from .config import Settings
 
@@ -318,7 +323,10 @@ class Controller:
                 t0 = time.monotonic()
                 facts = memory.load_facts() if self.settings.persistent_context else []
                 context = " ".join(facts + list(self._recent_context))
-                corrected = cleanup.correct_grammar(result.text, context=context)
+                if self.settings.cleanup_backend == "cloud":
+                    corrected = cloud_cleanup.correct_grammar_cloud(result.text, context=context, model=self.settings.cloud_model)
+                else:
+                    corrected = cleanup.correct_grammar(result.text, context=context)
                 cleanup_duration_s = time.monotonic() - t0
                 if corrected is not None:
                     output_text = corrected

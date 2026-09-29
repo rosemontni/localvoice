@@ -32,11 +32,13 @@ A narrower **grammar mode** was implemented 2026-09-26, ahead of the M3 schedule
 
 **P04 amendment, 2026-09-27:** a new, narrower exception to "no history by default" was added at explicit user request: `local_voice/memory.py` persists a small, bounded (30 entries, ~80 chars each) list of *abstracted standing facts* (names, recurring projects/terms) extracted from dictations by a local LLM call -- never raw transcript text -- to help the grammar-cleanup step disambiguate recurring names across restarts (homophone correction was otherwise limited to the current session; see DECISIONS_AND_RISKS.md). On by default (`settings.persistent_context`), unlike full transcript history (F10, still off by default). Inspect or clear it with `scripts/manage_memory.py`.
 
+**P01 amendment, 2026-09-28:** an opt-in cloud grammar-cleanup backend was added at explicit user request, after local-model testing (M0/M3 findings above) hit a real capability ceiling on homophone/context correction that a frontier model can plausibly clear without the local model's need for slow explicit reasoning (see the Typeless-architecture discussion and the model recommendation in DECISIONS_AND_RISKS.md, 2026-09-28). `local_voice/cloud_cleanup.py` sends only the already-transcribed dictated *text* (never audio, never the raw waveform) to the Anthropic API when `settings.cleanup_backend == "cloud"`; the default remains `"local"` (Ollama, fully on-device). The model id is pinned to a specific dated snapshot (`settings.cloud_model`) and never auto-floats to a newer release. Requires the user's own `ANTHROPIC_API_KEY` in the environment; never stored in settings.json or handled by the app itself.
+
 ## Privacy and operational requirements
 
 | ID | Requirement |
 |---|---|
-| P01 | Audio and transcript processing remain on this machine; no cloud inference fallback. |
+| P01 | Audio processing always remains on this machine, with no exception. Transcript *text* (never audio) may optionally be sent to a cloud LLM for the grammar-cleanup step only, if the user explicitly enables it (`settings.cleanup_backend = "cloud"`, off by default) -- see the 2026-09-28 amendment below. |
 | P02 | Audio remains in memory by default. No saved recordings; any unavoidable temporary file is removed on success, error, cancellation, and next startup after a crash. |
 | P03 | Keep runtime data outside the OneDrive workspace, under a configurable local application-data directory. |
 | P04 | History is off by default. When enabled, propose seven-day retention, with 24-hour and never-expire options. |

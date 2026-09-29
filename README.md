@@ -15,7 +15,7 @@ Licensed under [Apache 2.0](LICENSE).
 - Global push-to-talk hotkey (default F9), auto-restarts into a new chunk if you hit the recording cap without releasing (no lost audio on a forgotten key)
 - Local GPU transcription (faster-whisper, `large-v3`), auto-detects English/Mandarin/mixed and preserves code-switching (never translates)
 - Windows clipboard delivery, with optional one-shot auto-paste (`SendInput`, focus-rechecked, never retried)
-- Optional local grammar-cleanup pass (small local LLM via Ollama), with session context and a small persisted cross-session memory of names/recurring terms (see `scripts/manage_memory.py`) to help disambiguate homophone errors
+- Optional grammar-cleanup pass, with session context and a small persisted cross-session memory of names/recurring terms (see `scripts/manage_memory.py`) to help disambiguate homophone errors — backed by a local LLM via Ollama by default, or optionally a cloud model (Claude Haiku 4.5) for better context-based correction at the cost of sending dictated text (never audio) off-device; see "Cloud cleanup" below
 - Vocabulary hints for names/terms the model otherwise misses (see `scripts/manage_vocabulary.py`)
 
 ## Installing
@@ -23,6 +23,16 @@ Licensed under [Apache 2.0](LICENSE).
 Download the latest installer from [Releases](https://github.com/rosemontni/localvoice/releases) and run it. It's a small (~2 MB) installer that then sets up a dedicated Python environment and downloads the required packages (roughly 2 GB, CUDA runtime libraries + faster-whisper/ctranslate2/etc. — the Whisper model itself downloads separately, on first dictation). No admin rights needed; it installs per-user with a Start Menu entry and an optional desktop shortcut, both launching the app in the system tray (no console window). Right-click the tray icon to check for updates, open logs, or quit.
 
 The optional grammar-cleanup/homophone-correction feature needs [Ollama](https://ollama.com) installed separately (with a model such as `qwen3.5:4b` pulled) — the app works without it, just without that feature.
+
+### Cloud cleanup (optional)
+
+The local cleanup model sometimes can't fix a wrong character/homophone even with context, simply because it's a small model. Switching the cleanup backend to a frontier model via the Anthropic API fixes this in testing, at the cost of sending your already-transcribed dictated **text** (never audio) to Anthropic for that step. Off by default.
+
+To enable it:
+1. Set `ANTHROPIC_API_KEY` in your environment yourself (e.g. `setx ANTHROPIC_API_KEY "sk-ant-..."` in your own terminal) — the app reads it from the environment and never stores or displays it.
+2. In `%LOCALAPPDATA%\LocalVoice\settings.json`, set `"cleanup_backend": "cloud"`.
+
+The model id (`cloud_model` in settings) is pinned to a specific dated snapshot and never auto-upgrades — bumping to a newer model is a deliberate one-line config change, so a model update never silently changes behavior you've come to rely on.
 
 ## Running from source (development)
 

@@ -1,3 +1,4 @@
+anthropic==1.9.0
 ctranslate2==4.8.2
 faster-whisper==1.2.1
 numpy==2.5.3

@@ -34,6 +34,8 @@ class Settings:
     auto_paste: bool = False  # M2: one Ctrl+V via SendInput if the foreground target hasn't changed; clipboard fallback always remains
     persistent_context: bool = True  # bounded, abstracted standing facts (memory.py) that survive restarts; see docs/DECISIONS_AND_RISKS.md
     check_for_updates: bool = True  # narrow exception to the offline-by-default policy; at most once/day automatically, see updater.py
+    cleanup_backend: str = "local"  # "local" (Ollama, default, audio-and-text stay on-device) | "cloud" (Anthropic API, text only -- see cloud_cleanup.py)
+    cloud_model: str = "claude-haiku-4-5-20251001"  # pinned dated snapshot; change deliberately, never auto-floats to a newer model
 
 
 def _validate(data: dict) -> dict:

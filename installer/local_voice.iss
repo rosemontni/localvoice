@@ -9,7 +9,7 @@
 ; Build with: ISCC installer\local_voice.iss  (from the repo root)
 
 #define MyAppName "Local Voice"
-#define MyAppVersion "0.1.1"
+#define MyAppVersion "0.2.0"
 #define MyAppPublisher "rosemontni"
 #define MyAppURL "https://github.com/rosemontni/localvoice"
 
